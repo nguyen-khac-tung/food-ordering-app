@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Nihon Foods</string>
+    <string name="japanese_food">Japanese Foods</string>
+    <string name="design_by">Design By\n PRM392 - Group 5</string>
+    <string name="login_to_your_account">Login To Your Account</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="don_t_have_account">Don\'t Have Account?</string>
+    <string name="sign_up_here">Sign Up Here</string>
+    <string name="name">Name</string>
+    <string name="create_account">Create Account</string>
+    <string name="already_have_an_account">Already Have An Account?</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="forgot_password">Forgot password</string>
+    <string name="choose_location">To provide you with the best dining experience, we need your permission to access your device\'s location...</string>
+    <string name="choose_your_location">Choose Your Location</string>
+</resources>
