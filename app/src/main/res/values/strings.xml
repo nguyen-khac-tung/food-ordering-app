@@ -15,4 +15,6 @@
     <string name="forgot_password">Forgot password</string>
     <string name="choose_location">To provide you with the best dining experience, we need your permission to access your device\'s location...</string>
     <string name="choose_your_location">Choose Your Location</string>
+    <string name="city">City</string>
+    <string name="finish">Finish</string>
 </resources>
