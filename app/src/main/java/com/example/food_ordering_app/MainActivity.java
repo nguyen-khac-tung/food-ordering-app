@@ -27,5 +27,6 @@ public class MainActivity extends AppCompatActivity {
     private void logout() {
         mAuth.signOut();
         startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        finish();
     }
 }
