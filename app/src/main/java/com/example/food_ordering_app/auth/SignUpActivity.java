@@ -15,6 +15,7 @@ import com.example.food_ordering_app.Constants;
 import com.example.food_ordering_app.R;
 import com.example.food_ordering_app.config.FirebaseConfig;
 import com.example.food_ordering_app.models.User;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
@@ -26,6 +27,7 @@ import java.util.Objects;
 public class SignUpActivity extends AppCompatActivity {
     private static final String TAG = "SignupActivity";
     private EditText etName, etEmail, etPassword, etConfirmPassword;
+    private TextInputLayout confirmPasswordInputField, passwordInputField;
     private FirebaseAuth mAuth;
     private DatabaseReference DatabaseRef;
 
@@ -38,6 +40,8 @@ public class SignUpActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
+        confirmPasswordInputField = findViewById(R.id.confirmPasswordInputField);
+        passwordInputField = findViewById(R.id.passwordInputField);
         Button btnCreateAccount = findViewById(R.id.btnCreateAccount);
         btnCreateAccount.setOnClickListener(v -> registerUser());
         TextView tvAlreadyAccount = findViewById(R.id.tvAlreadyAccount);
@@ -60,18 +64,21 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
         if (password.isEmpty()) {
-            etPassword.setError("Password is required");
-            etPassword.requestFocus();
+            passwordInputField.setError("Password is required");
+            confirmPasswordInputField.setErrorIconDrawable(null);
+            passwordInputField.requestFocus();
             return;
         }
         if (confirmPassword.isEmpty()) {
-            etConfirmPassword.setError("Confirm Password is required");
-            etConfirmPassword.requestFocus();
+            confirmPasswordInputField.setError("Confirm Password is required");
+            confirmPasswordInputField.setErrorIconDrawable(null);
+            confirmPasswordInputField.requestFocus();
             return;
         }
         if (!password.equals(confirmPassword)) {
-            etConfirmPassword.setError("Passwords do not match");
-            etConfirmPassword.requestFocus();
+            confirmPasswordInputField.setError("Passwords do not match");
+            confirmPasswordInputField.setErrorIconDrawable(null);
+            confirmPasswordInputField.requestFocus();
             return;
         }
         mAuth.createUserWithEmailAndPassword(email, password)
