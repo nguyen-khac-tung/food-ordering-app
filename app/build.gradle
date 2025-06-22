@@ -53,4 +53,8 @@ dependencies {
     // Make sure you also have the Firebase BoM (Bill of Materials)
     implementation(platform("com.google.firebase:firebase-bom:32.7.4")) // Or the latest version
 
+    //implemetation for Glide
+    implementation 'com.github.bumptech.glide:glide:4.16.0' // Check for the latest version
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0' // Check for the latest version
+
 }
