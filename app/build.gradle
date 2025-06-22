@@ -47,4 +47,10 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+
+    //implementation for Firebase Storage
+    implementation("com.google.firebase:firebase-storage:20.3.0") // Or the latest version
+    // Make sure you also have the Firebase BoM (Bill of Materials)
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4")) // Or the latest version
+
 }
