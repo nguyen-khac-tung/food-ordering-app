@@ -47,6 +47,8 @@ public class LoginActivity extends AppCompatActivity {
         });
         TextView tvNoAccount = findViewById(R.id.tvNoAccount);
         tvNoAccount.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, SignUpActivity.class)));
+        TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
+        tvForgotPassword.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, ForgetPasswordActivity.class)));
     }
 
     @Override

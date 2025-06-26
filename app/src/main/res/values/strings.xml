@@ -17,4 +17,13 @@
     <string name="choose_your_location">Choose Your Location</string>
     <string name="city">City</string>
     <string name="finish">Finish</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="send_code">Send Code</string>
+    <string name="enter_verification_code">Enter Verification Code</string>
+    <string name="enter_6_digit_code">Enter 6-digit code</string>
+    <string name="verify">Verify</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_new_password">Confirm New Password</string>
+    <string name="back_to_login">Back to login</string>
 </resources>
