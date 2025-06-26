@@ -8,25 +8,6 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1061708404534:android:2e83195b4bb046a57f8597",
-        "android_client_info": {
-          "package_name": "com.example.adminwareoffood"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCYkxApqtINcN8YANSCDkaADcMs6E0lXMQ"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:1061708404534:android:56f9e84741e01ca57f8597",
         "android_client_info": {
           "package_name": "com.example.food_ordering_app"

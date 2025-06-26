@@ -27,7 +27,7 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         auth = FirebaseAuth.getInstance();
-        database = FirebaseDatabase.getInstance().getReference("Users");
+        database = FirebaseDatabase.getInstance().getReference("USERS");
 
         String[] locationList = {"VietNam", "Thailand", "Japan", "China", "Singapore"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
