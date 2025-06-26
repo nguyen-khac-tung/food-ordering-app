@@ -65,7 +65,7 @@ public class SignUpActivity extends AppCompatActivity {
         }
         if (password.isEmpty()) {
             passwordInputField.setError("Password is required");
-            confirmPasswordInputField.setErrorIconDrawable(null);
+            passwordInputField.setErrorIconDrawable(null);
             passwordInputField.requestFocus();
             return;
         }
@@ -106,8 +106,9 @@ public class SignUpActivity extends AppCompatActivity {
                             throw Objects.requireNonNull(createUserTask.getException());
                         } catch (FirebaseAuthWeakPasswordException e) {
                             errorMessage = "Password is too weak.";
-                            etPassword.setError(errorMessage);
-                            etPassword.requestFocus();
+                            passwordInputField.setError(errorMessage);
+                            passwordInputField.setErrorIconDrawable(null);
+                            passwordInputField.requestFocus();
                         } catch (FirebaseAuthInvalidCredentialsException e) {
                             errorMessage = "Email address is invalid or incorrectly formatted.";
                             etEmail.setError(errorMessage);
