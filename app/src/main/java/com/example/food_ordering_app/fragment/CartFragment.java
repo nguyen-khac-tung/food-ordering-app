@@ -1,5 +1,6 @@
 package com.example.food_ordering_app.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.food_ordering_app.PayOutActivity;
 import com.example.food_ordering_app.R;
 import com.example.food_ordering_app.adapter.CartAdapter;
 import com.example.food_ordering_app.databinding.FragmentCartBinding;
@@ -43,11 +45,16 @@ public class CartFragment extends Fragment {
                 R.drawable.menu6
         ));
 
-        CartAdapter adapter = new CartAdapter(cartFoodName, cartItemPrice, cartImage);
+        CartAdapter adapter = new CartAdapter(getContext(), cartFoodName, cartItemPrice, cartImage);
 
         // Thiết lập RecyclerView
         binding.cartRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.cartRecyclerView.setAdapter(adapter);
+
+        binding.proceedButton.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), PayOutActivity.class);
+            startActivity(intent);
+        });
 
         return binding.getRoot();
     }

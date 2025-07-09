@@ -45,7 +45,7 @@ public class MenuFragment extends BottomSheetDialogFragment {
                 R.drawable.menu1, R.drawable.menu2, R.drawable.menu3, R.drawable.menu4,
                 R.drawable.menu1, R.drawable.menu2, R.drawable.menu3, R.drawable.menu4);
 
-        MenuAdapter adapter = new MenuAdapter(foodNames, foodPrices, foodImages);
+        MenuAdapter adapter = new MenuAdapter(getContext(), foodNames, foodPrices, foodImages);
 
         binding.menuRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.menuRecyclerView.setAdapter(adapter);

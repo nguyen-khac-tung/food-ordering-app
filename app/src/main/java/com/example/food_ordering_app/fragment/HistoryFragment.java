@@ -38,7 +38,7 @@ public class HistoryFragment extends Fragment {
                 R.drawable.menu1, R.drawable.menu2, R.drawable.menu3, R.drawable.menu4,
                 R.drawable.menu1, R.drawable.menu2, R.drawable.menu3, R.drawable.menu4);
 
-        BuyAgainAdapter adapter = new BuyAgainAdapter(foodNames, foodPrices, foodImages);
+        BuyAgainAdapter adapter = new BuyAgainAdapter(getContext(), foodNames, foodPrices, foodImages);
 
         binding.buyAgainRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.buyAgainRecyclerView.setAdapter(adapter);

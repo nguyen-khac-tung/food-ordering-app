@@ -1,9 +1,13 @@
 package com.example.food_ordering_app.adapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.food_ordering_app.FoodDetailActivity;
 import com.example.food_ordering_app.databinding.CartItemBinding;
 import java.util.Arrays;
 import java.util.List;
@@ -13,12 +17,16 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     private List<String> cartFoodNames;
     private List<String> cartFoodPrices;
     private List<Integer> cartFoodImages;
+    private final Context context;
+    
     private int[] foodQuantities;
     
-    public CartAdapter(List<String> cartFoodNames, List<String> cartFoodPrices, List<Integer> cartFoodImages) {
+    public CartAdapter(Context context, List<String> cartFoodNames, List<String> cartFoodPrices, List<Integer> cartFoodImages) {
         this.cartFoodNames = cartFoodNames;
         this.cartFoodPrices = cartFoodPrices;
         this.cartFoodImages = cartFoodImages;
+        this.context = context; // Khởi tạo context
+        
         // Khởi tạo mảng số lượng, mặc định mỗi item có số lượng là 1
         this.foodQuantities = new int[cartFoodNames.size()];
         Arrays.fill(this.foodQuantities, 1);
@@ -50,6 +58,22 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         public CartViewHolder(@NonNull CartItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+
+            binding.getRoot().setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    // Tạo Intent ngay tại đây
+                    Intent intent = new Intent(context, FoodDetailActivity.class);
+
+                    // Đóng gói dữ liệu và gửi đi
+                    intent.putExtra("foodName", cartFoodNames.get(position));
+                    intent.putExtra("foodPrice", cartFoodPrices.get(position));
+                    intent.putExtra("foodImage", cartFoodImages.get(position));
+
+                    // Khởi chạy Activity từ Context đã được truyền vào
+                    context.startActivity(intent);
+                }
+            });
         }
 
         public void bind(int position) {

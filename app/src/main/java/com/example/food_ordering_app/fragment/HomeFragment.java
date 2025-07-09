@@ -68,7 +68,7 @@ public class HomeFragment extends Fragment {
         List<String> foodPrices = Arrays.asList("$5", "$7", "$8", "$10");
         List<Integer> foodImages = Arrays.asList(R.drawable.menu1, R.drawable.menu2, R.drawable.menu3, R.drawable.menu4);
         
-        PopularAdapter adapter = new PopularAdapter(foodNames, foodPrices, foodImages);
+        PopularAdapter adapter = new PopularAdapter(getContext(), foodNames, foodPrices, foodImages);
         
         binding.popularRecycleView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.popularRecycleView.setAdapter(adapter);
