@@ -7,23 +7,21 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.food_ordering_app.FoodDetailActivity;
+import com.example.food_ordering_app.R;
 import com.example.food_ordering_app.databinding.MenuItemBinding;
+import com.example.food_ordering_app.models.Food;
+import com.example.food_ordering_app.utils.CartHelper;
 
 import java.util.List;
 
 public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder> {
 
-    private final List<String> menuFoodNames;
-    private final List<String> menuFoodPrices;
-    private final List<Integer> menuFoodImages;
-    private final Context context;
-    
-    public MenuAdapter(Context context, List<String> menuFoodNames, List<String> menuFoodPrices, List<Integer> menuFoodImages) {
-        this.menuFoodNames = menuFoodNames;
-        this.menuFoodPrices = menuFoodPrices;
-        this.menuFoodImages = menuFoodImages;
-        this.context = context; // Khởi tạo context
+    private final List<Food> menuItems;
+
+    public MenuAdapter(List<Food> menuItems) {
+        this.menuItems = menuItems;
     }
     
     @NonNull
@@ -31,7 +29,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
     public MenuViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         MenuItemBinding binding = MenuItemBinding.inflate(inflater, parent, false);
-        return new MenuViewHolder(binding);
+        return new MenuViewHolder(binding, parent.getContext());
     }
 
     
@@ -43,38 +41,48 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
     
     @Override
     public int getItemCount() {
-        return menuFoodNames.size();
+        return menuItems.size();
     }
 
     //Lớp ViewHolder nội (Inner Class)
     public class MenuViewHolder extends RecyclerView.ViewHolder {
         private final MenuItemBinding binding;
+        private final Context context;
         
-        public MenuViewHolder(MenuItemBinding binding) {
+        public MenuViewHolder(MenuItemBinding binding, Context context) {
             super(binding.getRoot());
             this.binding = binding;
+            this.context = context;
 
             binding.getRoot().setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
-                    // Tạo Intent ngay tại đây
+                    Food clickedFood = menuItems.get(position);
                     Intent intent = new Intent(context, FoodDetailActivity.class);
-
                     // Đóng gói dữ liệu và gửi đi
-                    intent.putExtra("foodName", menuFoodNames.get(position));
-                    intent.putExtra("foodPrice", menuFoodPrices.get(position));
-                    intent.putExtra("foodImage", menuFoodImages.get(position));
+                    intent.putExtra("foodObject", clickedFood);
 
-                    // Khởi chạy Activity từ Context đã được truyền vào
                     context.startActivity(intent);
                 }
             });
         }
         
         public void bind(int position) {
-            binding.menuFoodName.setText(menuFoodNames.get(position));
-            binding.menuFoodPrice.setText(menuFoodPrices.get(position));
-            binding.menuFoodImage.setImageResource(menuFoodImages.get(position));
+            Food foodItem = menuItems.get(position);
+            binding.menuFoodName.setText(foodItem.getFoodName());
+            binding.menuFoodPrice.setText("$" + foodItem.getFoodPrice());
+
+            // Sử dụng Glide để tải ảnh từ URL
+            Glide.with(context)
+                    .load(foodItem.getFoodImageUrl())
+                    .placeholder(R.drawable.placeholder)
+                    .error(R.drawable.placeholder)
+                    .into(binding.menuFoodImage);
+
+            binding.addToCartMenu.setOnClickListener(v -> {
+                CartHelper.addToCart(context, foodItem);
+            });
         }
     }
+
 }

@@ -67,8 +67,8 @@
             android:layout_weight="1"
             android:background="@android:color/transparent"
             android:ems="10"
+            android:hint="Enter your name"
             android:inputType="textMultiLine"
-            android:text="lorem ipsum"
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -107,8 +107,8 @@
             android:layout_weight="1"
             android:background="@android:color/transparent"
             android:ems="10"
+            android:hint="Enter your address"
             android:inputType="textMultiLine"
-            android:text="Lorem ipsum is placeholder text  commonly used in the graphic,  print, and publishing industries  for previewing layouts and visual "
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -147,8 +147,8 @@
             android:layout_weight="1"
             android:background="@android:color/transparent"
             android:ems="10"
+            android:hint="Enter your phone number"
             android:inputType="phone"
-            android:text="123456789"
             android:textSize="16sp" />
     </LinearLayout>
 

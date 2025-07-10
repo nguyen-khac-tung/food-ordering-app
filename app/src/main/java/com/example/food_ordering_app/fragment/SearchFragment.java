@@ -2,78 +2,94 @@ package com.example.food_ordering_app.fragment;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
 
-import com.example.food_ordering_app.R;
 import com.example.food_ordering_app.adapter.MenuAdapter;
 import com.example.food_ordering_app.databinding.FragmentSearchBinding;
+import com.example.food_ordering_app.models.Food;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SearchFragment extends Fragment {
 
     private FragmentSearchBinding binding;
-
     private MenuAdapter adapter;
-
-    private final List<String> originalFoodNames = Arrays.asList("Burger", "Sandwich", "Momo", "Item", "Burger", "Sandwich", "Momo", "Item", "Burger", "Sandwich", "Momo", "Item");
-    private final List<String> originalFoodPrices = Arrays.asList("$5", "$7", "$8", "$10", "$5", "$7", "$8", "$10", "$5", "$7", "$8", "$10");
-    private final List<Integer> originalFoodImages = Arrays.asList(
-            R.drawable.menu1, R.drawable.menu2, R.drawable.menu3, R.drawable.menu4,
-            R.drawable.menu1, R.drawable.menu2, R.drawable.menu3, R.drawable.menu4,
-            R.drawable.menu1, R.drawable.menu2, R.drawable.menu3, R.drawable.menu4);
-
-    private List<String> filteredMenuFoodName = new ArrayList<>();
-    private List<String> filteredMenuItemPrice = new ArrayList<>();
-    private List<Integer> filteredMenuImage = new ArrayList<>();
+    private List<Food> originalMenuItems = new ArrayList<>();
+    private List<Food> filteredMenuItems = new ArrayList<>();
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentSearchBinding.inflate(inflater, container, false);
-        adapter = new MenuAdapter(getContext(), filteredMenuFoodName, filteredMenuItemPrice, filteredMenuImage);
+
+        adapter = new MenuAdapter(filteredMenuItems);
         binding.menuRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.menuRecyclerView.setAdapter(adapter);
 
-        //set up search view
+        //Thiết lập thanh tìm kiếm
         setupSearchView();
 
-        //Show all menu
-        showAllMenu();
+        //Lấy toàn bộ dữ liệu từ Firebase
+        retrieveAllMenuItems();
+
         return binding.getRoot();
     }
 
-    private void showAllMenu() {
-        filteredMenuFoodName.clear();
-        filteredMenuItemPrice.clear();
-        filteredMenuImage.clear();
+    private void retrieveAllMenuItems() {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference databaseReference = database.getReference("FOODS");
 
-        filteredMenuFoodName.addAll(originalFoodNames);
-        filteredMenuItemPrice.addAll(originalFoodPrices);
-        filteredMenuImage.addAll(originalFoodImages);
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                originalMenuItems.clear();
+                for (DataSnapshot foodSnapshot : snapshot.getChildren()) {
+                    Food food = foodSnapshot.getValue(Food.class);
+                    if (food != null) {
+                        food.setFoodId(foodSnapshot.getKey());
+                        originalMenuItems.add(food);
+                    }
+                }
+
+                showAllMenu();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("SearchFragment", "Failed to retrieve data.", error.toException());
+            }
+        });
+    }
+
+    private void showAllMenu() {
+        filteredMenuItems.clear();
+        filteredMenuItems.addAll(originalMenuItems);
         adapter.notifyDataSetChanged();
     }
 
     private void setupSearchView() {
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
             public boolean onQueryTextSubmit(String query) {
                 filterMenuItems(query);
                 return true;
             }
 
+            @Override
             public boolean onQueryTextChange(String newText) {
                 filterMenuItems(newText);
                 return true;
@@ -82,23 +98,26 @@ public class SearchFragment extends Fragment {
     }
 
     private void filterMenuItems(String query) {
-        filteredMenuFoodName.clear();
-        filteredMenuItemPrice.clear();
-        filteredMenuImage.clear();
+        filteredMenuItems.clear();
 
-        // Lặp qua danh sách gốc để tìm các mục khớp với truy vấn
-        for (int index = 0; index < originalFoodNames.size(); index++) {
-            String foodName = originalFoodNames.get(index);
-
-            // Kiểm tra xem tên món ăn có chứa chuỗi truy vấn hay không
-            if (foodName.toLowerCase().contains(query.toLowerCase())) {
-                filteredMenuFoodName.add(foodName);
-                filteredMenuItemPrice.add(originalFoodPrices.get(index));
-                filteredMenuImage.add(originalFoodImages.get(index));
+        if (query.isEmpty()) {
+            filteredMenuItems.addAll(originalMenuItems);
+        } else {
+            // Lặp qua danh sách GỐC để tìm kiếm
+            for (Food foodItem : originalMenuItems) {
+                if (foodItem.getFoodName().toLowerCase().contains(query.toLowerCase())) {
+                    filteredMenuItems.add(foodItem);
+                }
             }
         }
 
         // Thông báo cho adapter rằng dữ liệu đã thay đổi để cập nhật giao diện
         adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null; // Tránh memory leak
     }
 }

@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +15,19 @@ import android.view.ViewGroup;
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.models.SlideModel;
+import com.example.food_ordering_app.Constants;
 import com.example.food_ordering_app.R;
+import com.example.food_ordering_app.config.FirebaseConfig;
 import com.example.food_ordering_app.databinding.FragmentHomeBinding;
 import com.example.food_ordering_app.adapter.PopularAdapter;
+import com.example.food_ordering_app.models.Food;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -53,23 +61,55 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //Banner
-        List<SlideModel> imageList = new ArrayList<>();
+        setupBanner();
+        retrieveAndDisplayPopularItems();
+    }
 
+    private void setupBanner() {
+        List<SlideModel> imageList = new ArrayList<>();
         imageList.add(new SlideModel(R.drawable.banner1, ScaleTypes.FIT));
         imageList.add(new SlideModel(R.drawable.banner2, ScaleTypes.FIT));
         imageList.add(new SlideModel(R.drawable.banner3, ScaleTypes.FIT));
 
         ImageSlider imageSlider = binding.imageSlider;
         imageSlider.setImageList(imageList, ScaleTypes.FIT);
+    }
 
-        //Popular Foods
-        List<String> foodNames = Arrays.asList("Burger", "Sandwich", "Momo", "Item");
-        List<String> foodPrices = Arrays.asList("$5", "$7", "$8", "$10");
-        List<Integer> foodImages = Arrays.asList(R.drawable.menu1, R.drawable.menu2, R.drawable.menu3, R.drawable.menu4);
-        
-        PopularAdapter adapter = new PopularAdapter(getContext(), foodNames, foodPrices, foodImages);
-        
+    private void retrieveAndDisplayPopularItems() {
+        DatabaseReference databaseReference = FirebaseConfig.getDatabase().getReference(Constants.FirebaseRef.FOODS.toString());
+
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    List<Food> allMenuItems = new ArrayList<>();
+                    for (DataSnapshot foodSnapshot : snapshot.getChildren()) {
+                        Food food = foodSnapshot.getValue(Food.class);
+                        if (food != null) {
+                            food.setFoodId(foodSnapshot.getKey());
+                            allMenuItems.add(food);
+                        }
+                    }
+
+                    displayRandomPopularItems(allMenuItems);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("HomeFragment", "Failed to retrieve popular items.", error.toException());
+            }
+        });
+    }
+
+    private void displayRandomPopularItems(List<Food> allMenuItems) {
+        // Xáo trộn toàn bộ danh sách
+        Collections.shuffle(allMenuItems);
+
+        int numberOfItemsToShow = Math.min(allMenuItems.size(), 6);
+        List<Food> popularItems = allMenuItems.subList(0, numberOfItemsToShow);
+
+        PopularAdapter adapter = new PopularAdapter(popularItems);
         binding.popularRecycleView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.popularRecycleView.setAdapter(adapter);
     }

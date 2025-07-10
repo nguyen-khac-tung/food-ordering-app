@@ -10,7 +10,8 @@ public class Constants {
     public enum FirebaseRef {
         USERS,
         ADMINS,
-        PRODUCTS,
+        FOODS,
+        CARTS,
         ORDERS;
     }
 }
