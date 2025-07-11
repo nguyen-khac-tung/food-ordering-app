@@ -10,8 +10,8 @@
     <item android:title="Search"
         android:id="@+id/searchFragment"
         android:icon="@drawable/search"/>
-    <item android:title="History"
-        android:id="@+id/historyFragment"
+    <item android:title="Order"
+        android:id="@+id/orderFragment"
         android:icon="@drawable/list"/>
     <item android:title="Profile"
         android:id="@+id/profileFragment"

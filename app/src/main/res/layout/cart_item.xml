@@ -39,12 +39,14 @@
 
             <TextView
                 android:id="@+id/cartFoodName"
-                android:layout_width="wrap_content"
+                android:layout_width="90dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
+                android:ellipsize="end"
                 android:fontFamily="@font/yeonsung_regular"
-                android:text="TextView"
+                android:maxLines="1"
+                android:text="TextView dddddddddddddddd"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toTopOf="@+id/cartFoodPrice"

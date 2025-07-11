@@ -1,5 +1,6 @@
 package com.example.food_ordering_app;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -24,6 +25,10 @@ public class FoodDetailActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.buttonBack.setOnClickListener(v -> finish());
+        binding.buttonHome.setOnClickListener(v -> {
+            Intent intent = new Intent(FoodDetailActivity.this, MainActivity.class);
+            startActivity(intent);
+        });
 
         // Nhận toàn bộ đối tượng Food từ Intent
         Food food = (Food) getIntent().getSerializableExtra("foodObject");

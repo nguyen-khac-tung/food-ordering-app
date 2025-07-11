@@ -19,7 +19,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
-    private static final int SPLASH_DELAY = 3000;
+    private static final int SPLASH_DELAY = 1000;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

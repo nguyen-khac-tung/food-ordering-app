@@ -26,6 +26,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +38,7 @@ public class CartFragment extends Fragment {
     private List<Cart> cartItems;
     private DatabaseReference cartDatabaseRef;
     private ValueEventListener cartValueEventListener;
+    private int totalAmount = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,6 +58,8 @@ public class CartFragment extends Fragment {
                 Toast.makeText(getContext(), "Your cart is empty.", Toast.LENGTH_SHORT).show();
             } else {
                 Intent intent = new Intent(requireContext(), PayOutActivity.class);
+                intent.putExtra("cartItems", (Serializable) cartItems);
+                intent.putExtra("totalAmount", totalAmount);
                 startActivity(intent);
             }
         });
@@ -82,10 +86,12 @@ public class CartFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 cartItems.clear();
+                totalAmount = 0;
                 for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
                     Cart cart = itemSnapshot.getValue(Cart.class);
                     if (cart != null) {
                         cartItems.add(cart);
+                        totalAmount += (cart.getFoodPrice() * cart.getQuantity());
                     }
                 }
                 adapter.notifyDataSetChanged();
@@ -94,7 +100,7 @@ public class CartFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (getContext() != null) { // Kiểm tra context trước khi dùng
+                if (getContext() != null) {
                     Log.e("CartFragment", "Failed to load cart items.", error.toException());
                     Toast.makeText(getContext(), "Failed to load cart.", Toast.LENGTH_SHORT).show();
                 }
@@ -106,12 +112,12 @@ public class CartFragment extends Fragment {
 
     private void updateUIBasedOnCart() {
         if (cartItems.isEmpty()) {
-            binding.emptyCartTextView.setVisibility(View.VISIBLE);
+            binding.emptyCart.setVisibility(View.VISIBLE);
             binding.cartRecyclerView.setVisibility(View.GONE);
             binding.proceedButton.setEnabled(false);
             binding.proceedButton.setAlpha(0.8f);
         } else {
-            binding.emptyCartTextView.setVisibility(View.GONE);
+            binding.emptyCart.setVisibility(View.GONE);
             binding.cartRecyclerView.setVisibility(View.VISIBLE);
             binding.proceedButton.setEnabled(true);
             binding.proceedButton.setAlpha(1.0f);
