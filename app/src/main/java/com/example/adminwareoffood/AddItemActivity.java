@@ -132,7 +132,7 @@ public class AddItemActivity extends AppCompatActivity {
                             foodName, // Uses the class member variable
                             foodPrice,
                             foodDescription,
-                            foodIngredient,
+                            foodIngredient, 
                             downloadUrl.toString()
                     );
 

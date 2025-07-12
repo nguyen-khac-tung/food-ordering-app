@@ -1,20 +1,29 @@
 package com.example.adminwareoffood.adapter;
 
+import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.adminwareoffood.databinding.PendingOrderItemBinding;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PendingOrderAdapter extends RecyclerView.Adapter<PendingOrderAdapter.PendingOrderViewHolder> {
-    private final ArrayList<String> customerNames;
-    private final ArrayList<String> quantity;
-    private final ArrayList<Integer> foodImage;
+
+    //private final Context context;
+
+    private final List<String> customerNames;
+    private final List<String> quantity;
+    private final List<Integer> foodImage;
     private final android.content.Context context;
+    //private val itemClicked:onItemClicked
+
 
     public PendingOrderAdapter(ArrayList<String> customerNames, ArrayList<String> quantity, ArrayList<Integer> foodImage, android.content.Context context) {
         this.customerNames = customerNames;
@@ -22,6 +31,7 @@ public class PendingOrderAdapter extends RecyclerView.Adapter<PendingOrderAdapte
         this.foodImage = foodImage;
         this.context = context;
     }
+
 
     @Override
     public PendingOrderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -52,7 +62,12 @@ public class PendingOrderAdapter extends RecyclerView.Adapter<PendingOrderAdapte
         public void bind(int position) {
             binding.customerName.setText(customerNames.get(position));
             binding.pendingOrderQuantity.setText(quantity.get(position));
-            binding.orderFoodImage.setImageResource(foodImage.get(position));
+//            binding.orderFoodImage.setImageResource(foodImage.get(position));
+            //start
+            String uriString = String.valueOf(foodImage.get(position));
+            Uri uri = Uri.parse(uriString);
+            Glide.with(context).load(uri).into(binding.orderFoodImage);
+
 
             binding.orderedAcceptionButton.setText(isAccept ? "Dispatch" : "Accept");
             binding.orderedAcceptionButton.setOnClickListener(v -> {
