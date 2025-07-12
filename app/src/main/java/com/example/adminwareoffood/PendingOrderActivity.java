@@ -25,7 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PendingOrderActivity extends AppCompatActivity {
+public class PendingOrderActivity extends AppCompatActivity ,pendingOrderAdapter.onItemClicked {
     private ActivityPendingOrderBinding binding;
     //start
     private List<String> listOfName = new ArrayList<>();
@@ -123,9 +123,16 @@ public class PendingOrderActivity extends AppCompatActivity {
     private void setAdapter() {
         Context context = null;
         binding.pendingOrderRecycleView.setLayoutManager(new LinearLayoutManager(context));
-        PendingOrderAdapter adapter = new PendingOrderAdapter(context, listOfName, listOfTotalPrice, listOfImageFirstFoodOrder);
+        PendingOrderAdapter adapter = new PendingOrderAdapter(this, listOfName, listOfTotalPrice, listOfImageFirstFoodOrder,this);
         binding.pendingOrderRecycleView.setAdapter(adapter);
     }
 
+    @Override
+    public void onItemClickListener(int position) {
+        Intent intent = new Intent(this, OrderDetailsActivity.class);
+        OrderDetails userOrderDetails = ListOfOrderItem.get(position);
+        intent.putExtra("UserOrderDetails", userOrderDetails);
+        startActivity(intent);
+    }
 
 }

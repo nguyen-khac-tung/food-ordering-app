@@ -22,8 +22,11 @@ public class PendingOrderAdapter extends RecyclerView.Adapter<PendingOrderAdapte
     private final List<String> quantity;
     private final List<Integer> foodImage;
     private final android.content.Context context;
-    //private val itemClicked:onItemClicked
+    private final onItemClicked itemClicked;
 
+interface onItemClicked {
+        void onItemClick(int position);
+    }
 
     public PendingOrderAdapter(ArrayList<String> customerNames, ArrayList<String> quantity, ArrayList<Integer> foodImage, android.content.Context context) {
         this.customerNames = customerNames;
@@ -85,7 +88,12 @@ public class PendingOrderAdapter extends RecyclerView.Adapter<PendingOrderAdapte
                         showToast("Order is dispatched");
                     }
                 }
-            });
+            }item.vỉew.setOnClickListener(v -> {
+                if (itemClicked != null) {
+                    itemClicked.onItemClick(getAdapterPosition());
+                }
+            }
+            );
         }
 
         private void showToast(String message) {
