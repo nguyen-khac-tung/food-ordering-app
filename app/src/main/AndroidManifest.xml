@@ -60,6 +60,8 @@
         <activity
             android:name=".PayOutActivity"
             android:exported="false" />
+        <activity android:name=".PersonalInformationActivity"/>
+        <activity android:name=".UpdateProfileActivity"/>
     </application>
 
 </manifest>
