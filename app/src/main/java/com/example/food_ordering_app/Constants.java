@@ -17,6 +17,14 @@ public class Constants {
 
         StatusOrder(String displayName) { this.displayName = displayName; }
         public String getDisplayName() { return displayName; }
+        public static StatusOrder fromValue(String value) {
+            for (StatusOrder status : values()) {
+                if (status.getDisplayName().equalsIgnoreCase(value)) {
+                    return status;
+                }
+            }
+            return null;
+        }
     }
 
     public enum FirebaseRef {

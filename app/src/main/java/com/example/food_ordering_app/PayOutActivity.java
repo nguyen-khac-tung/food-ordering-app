@@ -1,5 +1,6 @@
 package com.example.food_ordering_app;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -16,6 +17,7 @@ import com.example.food_ordering_app.fragment.CongratulationFragment;
 import com.example.food_ordering_app.models.Cart;
 import com.example.food_ordering_app.models.Order;
 import com.example.food_ordering_app.models.User;
+import com.example.food_ordering_app.utils.NotificationHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -103,10 +105,15 @@ public class PayOutActivity extends AppCompatActivity {
                     removeCart();
                     CongratulationFragment congratulationFragment = new CongratulationFragment();
                     congratulationFragment.show(getSupportFragmentManager(), congratulationFragment.getTag());
+                    NotificationHelper.showOrderStatusNotification(
+                            this,
+                            order.getOrderId(),
+                            "Wait for confirmation", "Your order " + order.getOrderId() + " is waiting for confirmation, please wait a few minutes");
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to place order: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+
     }
 
     private void removeCart() {
