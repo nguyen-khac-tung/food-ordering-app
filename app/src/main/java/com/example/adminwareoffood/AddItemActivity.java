@@ -14,12 +14,8 @@ import com.example.food_ordering_app.databinding.ActivityAddItemBinding;
 import com.example.adminwareoffood.model.MenuItem;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
@@ -32,6 +28,7 @@ public class AddItemActivity extends AppCompatActivity {
     private Uri selectedImageUri;
     private ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher;
     private DatabaseReference dbRef;
+    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +37,11 @@ public class AddItemActivity extends AppCompatActivity {
         binding = ActivityAddItemBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Khởi tạo Firebase
         dbRef = FirebaseDatabase.getInstance().getReference("FOODS");
+        storageRef = FirebaseStorage.getInstance().getReference("menuImages");
 
+        // Khởi tạo pickImageLauncher
         pickImageLauncher = registerForActivityResult(
                 new ActivityResultContracts.PickVisualMedia(),
                 uri -> {
@@ -54,12 +54,14 @@ public class AddItemActivity extends AppCompatActivity {
                 }
         );
 
+        // Khởi tạo MediaManager với cấu hình Cloudinary
         Map config = new HashMap<>();
         config.put("cloud_name", "dak6p5n8s"); // Thay bằng cloud name thực tế của bạn
         config.put("api_key", "666987486165934"); // Thay bằng API key thực tế của bạn
         config.put("api_secret", "9m4AdssI33RSghnyUFqCTcCMNZ0"); // Thay bằng API secret thực tế của bạn
         MediaManager.init(this, config);
 
+        // Thiết lập các sự kiện cho button
         binding.backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
         binding.selectImage.setOnClickListener(v -> {
             pickImageLauncher.launch(new PickVisualMediaRequest.Builder()
@@ -73,8 +75,8 @@ public class AddItemActivity extends AppCompatActivity {
     private void addItemToFirebase() {
         String name = binding.enterFoodName.getText().toString().trim();
         String priceStr = binding.enterFoodPrice.getText().toString().trim();
-        String description = binding.description.getText().toString().trim();
-        String ingredients = binding.ingredint.getText().toString().trim();
+        String description = binding.foodDescription.getText().toString().trim();
+        String ingredients = binding.foodIngredient.getText().toString().trim();
 
         if (name.isEmpty() || priceStr.isEmpty() || selectedImageUri == null) {
             Toast.makeText(this, "Vui lòng nhập đủ thông tin và chọn ảnh", Toast.LENGTH_SHORT).show();
@@ -92,8 +94,7 @@ public class AddItemActivity extends AppCompatActivity {
         ProgressDialog dialog = ProgressDialog.show(this, "", "Đang tải lên...", true);
 
         // Tải ảnh lên Cloudinary
-        MediaManager.get().upload(selectedImageUri)
-                .unsigned("prm_unsigned")
+        MediaManager.get().upload(selectedImageUri).unsigned("prm_unsigned") // Thay bằng upload preset thực tế
                 .callback(new UploadCallback() {
                     @Override
                     public void onStart(String requestId) {
@@ -111,7 +112,6 @@ public class AddItemActivity extends AppCompatActivity {
                             Log.d(TAG, "Upload success: " + resultData.toString());
                             String imageUrl = (String) resultData.get("secure_url");
                             if (imageUrl != null) {
-                                // Tạo ID duy nhất
                                 String id = dbRef.push().getKey();
                                 MenuItem item = new MenuItem(id, name, price, description, ingredients, imageUrl);
                                 dbRef.child(id).setValue(item)

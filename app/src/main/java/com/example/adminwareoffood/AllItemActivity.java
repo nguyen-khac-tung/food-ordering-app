@@ -41,21 +41,12 @@ public class AllItemActivity extends AppCompatActivity {
         itemList = new ArrayList<>();
 
         adapter = new AddItemAdapter(itemList, item -> {
-
-            new androidx.appcompat.app.AlertDialog.Builder(AllItemActivity.this)
-                    .setTitle("Xác nhận xoá")
-                    .setMessage("Bạn có muốn xoá \"" + item.foodName + "\" không?")
-                    .setPositiveButton("Xoá", (dialog, which) -> {
-                        dbRef.child(item.getId()).removeValue()
-                                .addOnSuccessListener(aVoid ->
-                                        Toast.makeText(AllItemActivity.this, "Đã xoá " + item.foodName, Toast.LENGTH_SHORT).show())
-                                .addOnFailureListener(e ->
-                                        Toast.makeText(AllItemActivity.this, "Xoá thất bại", Toast.LENGTH_SHORT).show());
-                    })
-                    .setNegativeButton("Hủy", null)
-                    .show();
+            dbRef.child(item.getId()).removeValue()
+                    .addOnSuccessListener(aVoid ->
+                            Toast.makeText(AllItemActivity.this, "Đã xóa", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e ->
+                            Toast.makeText(AllItemActivity.this, "Xóa thất bại", Toast.LENGTH_SHORT).show());
         });
-
 
         binding.menuRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.menuRecyclerView.setAdapter(adapter);

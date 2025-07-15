@@ -2,8 +2,10 @@ package com.example.adminwareoffood.adapter;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.example.adminwareoffood.model.MenuItem;
 import com.example.food_ordering_app.databinding.ItemItemBinding;
@@ -19,9 +21,10 @@ public class AddItemAdapter extends RecyclerView.Adapter<AddItemAdapter.AddItemV
     public interface OnItemDeleteListener {
         void onDelete(MenuItem item);
     }
-    public AddItemAdapter(List<MenuItem> itemList, OnItemDeleteListener onItemDeleteListener) {
+
+    public AddItemAdapter(List<MenuItem> itemList, OnItemDeleteListener listener) {
         this.itemList = itemList;
-        this.onItemDeleteListener = onItemDeleteListener;
+        this.onItemDeleteListener = listener;
     }
 
     @NonNull
@@ -51,13 +54,15 @@ public class AddItemAdapter extends RecyclerView.Adapter<AddItemAdapter.AddItemV
 
         void bind(MenuItem item, OnItemDeleteListener listener) {
             binding.foodNameTextView.setText(item.foodName);
-            NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN")); // Ví dụ cho VND
+            NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
             binding.priceTextView.setText(currencyFormatter.format(item.foodPrice));
+
             Glide.with(binding.foodImageView.getContext())
                     .load(item.foodImageUrl)
+
                     .into(binding.foodImageView);
 
-            binding.deleteButton.setOnClickListener(v ->{
+            binding.deleteButton.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onDelete(item);
                 }
