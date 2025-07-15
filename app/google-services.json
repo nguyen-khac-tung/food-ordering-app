@@ -5,6 +5,7 @@
     "project_id": "prn392",
     "storage_bucket": "prn392.firebasestorage.app"
   },
+
   "client": [
     {
       "client_info": {

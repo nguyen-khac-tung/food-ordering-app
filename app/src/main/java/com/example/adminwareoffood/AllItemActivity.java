@@ -1,18 +1,35 @@
 package com.example.adminwareoffood;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.adminwareoffood.adapter.AddItemAdapter;
-import com.example.adminwareoffood.databinding.ActivityAllItemBinding;
+import com.example.adminwareoffood.model.MenuItem;
+import com.example.food_ordering_app.databinding.ActivityAllItemBinding;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class AllItemActivity extends AppCompatActivity {
     private ActivityAllItemBinding binding;
+    private List<MenuItem> itemList;
+    private AddItemAdapter adapter;
+    private DatabaseReference dbRef;
+    private String lastKey = null;
+    private static final int ITEMS_PER_PAGE = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,34 +37,103 @@ public class AllItemActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = ActivityAllItemBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-        
-        ArrayList<String> menuFoodName = new ArrayList<>();
-        menuFoodName.add("Burger");
-        menuFoodName.add("Sanwich");
-        menuFoodName.add("Momo");
-        menuFoodName.add("Item1");
-        menuFoodName.add("item2");
-        menuFoodName.add("Item3");
 
-        ArrayList<String> menuItemPrice = new ArrayList<>();
-        menuItemPrice.add("$5");
-        menuItemPrice.add("$10");
-        menuItemPrice.add("$6");
-        menuItemPrice.add("$7");
-        menuItemPrice.add("$12");
-        menuItemPrice.add("$8");
+        itemList = new ArrayList<>();
 
-        ArrayList<Integer> menuImage = new ArrayList<>();
-        menuImage.add(R.drawable.menu1);
-        menuImage.add(R.drawable.menu2);
-        menuImage.add(R.drawable.menu3);
-        menuImage.add(R.drawable.menu4);
-        menuImage.add(R.drawable.menu5);
-        menuImage.add(R.drawable.menu3);
+        adapter = new AddItemAdapter(itemList, item -> {
 
-        AddItemAdapter adapter = new AddItemAdapter(menuFoodName, menuItemPrice, menuImage);
+            new androidx.appcompat.app.AlertDialog.Builder(AllItemActivity.this)
+                    .setTitle("Xác nhận xoá")
+                    .setMessage("Bạn có muốn xoá \"" + item.foodName + "\" không?")
+                    .setPositiveButton("Xoá", (dialog, which) -> {
+                        dbRef.child(item.getId()).removeValue()
+                                .addOnSuccessListener(aVoid ->
+                                        Toast.makeText(AllItemActivity.this, "Đã xoá " + item.foodName, Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(AllItemActivity.this, "Xoá thất bại", Toast.LENGTH_SHORT).show());
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
+        });
+
+
         binding.menuRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.menuRecyclerView.setAdapter(adapter);
+
+        dbRef = FirebaseDatabase.getInstance().getReference("FOODS");
+        loadItemsFromFirebase();
+
+        binding.backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        binding.loadMoreButton.setOnClickListener(v -> loadMoreItems());
+    }
+
+    private void loadItemsFromFirebase() {
+        Query query = dbRef.orderByKey().limitToFirst(ITEMS_PER_PAGE);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    itemList.clear();
+                    for (DataSnapshot data : snapshot.getChildren()) {
+                        MenuItem item = data.getValue(MenuItem.class);
+                        if (item != null) {
+                            itemList.add(item);
+                        }
+                    }
+                    // Cập nhật key cuối
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        lastKey = child.getKey();
+                    }
+                    adapter.notifyDataSetChanged();
+                    toggleLoadMoreButton(snapshot.getChildrenCount() >= ITEMS_PER_PAGE);
+                } else {
+                    toggleLoadMoreButton(false);
+                    Toast.makeText(AllItemActivity.this, "Không có dữ liệu", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("AllItemActivity", "Lỗi: " + error.getMessage());
+                toggleLoadMoreButton(false);
+            }
+        });
+    }
+
+    private void loadMoreItems() {
+        if (lastKey == null) {
+            Toast.makeText(this, "Không có thêm dữ liệu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Query query = dbRef.orderByKey().startAfter(lastKey).limitToFirst(ITEMS_PER_PAGE);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot data : snapshot.getChildren()) {
+                        MenuItem item = data.getValue(MenuItem.class);
+                        if (item != null) {
+                            itemList.add(item);
+                        }
+                    }
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        lastKey = child.getKey();
+                    }
+                    adapter.notifyDataSetChanged();
+                    toggleLoadMoreButton(snapshot.getChildrenCount() >= ITEMS_PER_PAGE);
+                } else {
+                    lastKey = null;
+                    toggleLoadMoreButton(false);
+                    Toast.makeText(AllItemActivity.this, "Đã tải hết dữ liệu", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("AllItemActivity", "Lỗi: " + error.getMessage());
+            }
+        });
+    }
+
+    private void toggleLoadMoreButton(boolean enable) {
+        binding.loadMoreButton.setVisibility(enable ? View.VISIBLE : View.GONE);
     }
 }

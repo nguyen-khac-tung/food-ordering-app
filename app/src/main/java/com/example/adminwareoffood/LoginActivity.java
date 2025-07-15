@@ -7,7 +7,8 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.adminwareoffood.databinding.ActivityLoginBinding;
+
+import com.example.food_ordering_app.databinding.ActivityLoginBinding;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {

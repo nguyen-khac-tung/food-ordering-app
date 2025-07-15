@@ -1,30 +1,27 @@
 package com.example.adminwareoffood.adapter;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
+import com.example.adminwareoffood.model.MenuItem;
+import com.example.food_ordering_app.databinding.ItemItemBinding;
 
-import com.example.adminwareoffood.databinding.ItemItemBinding;
-
-import java.util.ArrayList;
+import java.text.NumberFormat;
+import java.util.List;
+import java.util.Locale;
 
 public class AddItemAdapter extends RecyclerView.Adapter<AddItemAdapter.AddItemViewHolder> {
-    private final ArrayList<String> menuItemName;
-    private final ArrayList<String> menuItemPrice;
-    private final ArrayList<Integer> menuItemImage;
-    private final int[] itemQuantities;
+    private final List<MenuItem> itemList;
+    private final OnItemDeleteListener onItemDeleteListener;
 
-    public AddItemAdapter(ArrayList<String> menuItemName, ArrayList<String> menuItemPrice, ArrayList<Integer> menuItemImage) {
-        this.menuItemName = menuItemName;
-        this.menuItemPrice = menuItemPrice;
-        this.menuItemImage = menuItemImage;
-        this.itemQuantities = new int[menuItemName.size()];
-        for (int i = 0; i < itemQuantities.length; i++) {
-            itemQuantities[i] = 1;
-        }
+    public interface OnItemDeleteListener {
+        void onDelete(MenuItem item);
+    }
+    public AddItemAdapter(List<MenuItem> itemList, OnItemDeleteListener onItemDeleteListener) {
+        this.itemList = itemList;
+        this.onItemDeleteListener = onItemDeleteListener;
     }
 
     @NonNull
@@ -36,15 +33,15 @@ public class AddItemAdapter extends RecyclerView.Adapter<AddItemAdapter.AddItemV
 
     @Override
     public void onBindViewHolder(@NonNull AddItemViewHolder holder, int position) {
-        holder.bind(position);
+        holder.bind(itemList.get(position), onItemDeleteListener);
     }
 
     @Override
     public int getItemCount() {
-        return menuItemName.size();
+        return itemList.size();
     }
 
-    class AddItemViewHolder extends RecyclerView.ViewHolder {
+    static class AddItemViewHolder extends RecyclerView.ViewHolder {
         private final ItemItemBinding binding;
 
         AddItemViewHolder(ItemItemBinding binding) {
@@ -52,46 +49,19 @@ public class AddItemAdapter extends RecyclerView.Adapter<AddItemAdapter.AddItemV
             this.binding = binding;
         }
 
-        void bind(int position) {
-            binding.foodNameTextView.setText(menuItemName.get(position));
-            binding.priceTextView.setText(menuItemPrice.get(position));
-            binding.foodImageView.setImageResource(menuItemImage.get(position));
-            binding.quantityTextView.setText(String.valueOf(itemQuantities[position]));
+        void bind(MenuItem item, OnItemDeleteListener listener) {
+            binding.foodNameTextView.setText(item.foodName);
+            NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN")); // Ví dụ cho VND
+            binding.priceTextView.setText(currencyFormatter.format(item.foodPrice));
+            Glide.with(binding.foodImageView.getContext())
+                    .load(item.foodImageUrl)
+                    .into(binding.foodImageView);
 
-            binding.minusButton.setOnClickListener(v -> decreaseQuantity(position));
-            binding.plusButton.setOnClickListener(v -> increaseQuantity(position));
-            binding.deleteButton.setOnClickListener(v -> deleteItem(position));
-
-        }
-
-        private void decreaseQuantity(int position) {
-            if (itemQuantities[position] > 1) {
-                itemQuantities[position]--;
-                binding.quantityTextView.setText(String.valueOf(itemQuantities[position]));
-            }
-        }
-
-        private void increaseQuantity(int position) {
-            if (itemQuantities[position] < 10) {
-                itemQuantities[position]++;
-                binding.quantityTextView.setText(String.valueOf(itemQuantities[position]));
-            }
-        }
-
-        private void deleteItem(int position) {
-            menuItemName.remove(position);
-            menuItemPrice.remove(position);
-            menuItemImage.remove(position);
-            // Remove quantity
-            int[] newQuantities = new int[itemQuantities.length - 1];
-            for (int i = 0, j = 0; i < itemQuantities.length; i++) {
-                if (i != position) {
-                    newQuantities[j++] = itemQuantities[i];
+            binding.deleteButton.setOnClickListener(v ->{
+                if (listener != null) {
+                    listener.onDelete(item);
                 }
-            }
-            System.arraycopy(newQuantities, 0, itemQuantities, 0, newQuantities.length);
-            notifyItemRemoved(position);
-            notifyItemRangeChanged(position, menuItemName.size());
+            });
         }
     }
 }

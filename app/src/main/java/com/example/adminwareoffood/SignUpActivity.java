@@ -5,11 +5,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.adminwareoffood.databinding.ActivitySignUpBinding;
+import com.example.adminwareoffood.model.UserAdmin;
+import com.example.food_ordering_app.databinding.ActivitySignUpBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -27,7 +27,7 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         auth = FirebaseAuth.getInstance();
-        database = FirebaseDatabase.getInstance().getReference("USERS");
+        database = FirebaseDatabase.getInstance().getReference(Constants.FirebaseRef.ADMINS.name());
 
         String[] locationList = {"VietNam", "Thailand", "Japan", "China", "Singapore"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -53,11 +53,11 @@ public class SignUpActivity extends AppCompatActivity {
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful() && auth.getCurrentUser() != null) {
                             String userId = auth.getCurrentUser().getUid();
-                            User user = new User(userName, nameOfRestaurant, email, location);
-                            database.child(userId).setValue(user)
+                            UserAdmin userAdmin = new UserAdmin(userName, nameOfRestaurant, email, location, "ROLE_ADMIN"); // phone sẽ mặc định là ""
+                            database.child(userId).setValue(userAdmin)
                                     .addOnCompleteListener(dbTask -> {
                                         if (dbTask.isSuccessful()) {
-                                            Toast.makeText(this, "Account created successfully", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(this, "Account created successfully as admin", Toast.LENGTH_SHORT).show();
                                             startActivity(new Intent(this, LoginActivity.class));
                                             finish();
                                         } else {

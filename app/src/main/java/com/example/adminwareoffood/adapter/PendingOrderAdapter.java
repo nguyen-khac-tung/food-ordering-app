@@ -1,25 +1,28 @@
 package com.example.adminwareoffood.adapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.adminwareoffood.databinding.PendingOrderItemBinding;
-
+import com.bumptech.glide.Glide;
+import com.example.adminwareoffood.model.Order;
+import com.example.adminwareoffood.model.Cart;
+import com.example.adminwareoffood.Constants;
+import com.example.adminwareoffood.OrderDetailsActivity;
+import com.example.food_ordering_app.databinding.PendingOrderItemBinding;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 
 public class PendingOrderAdapter extends RecyclerView.Adapter<PendingOrderAdapter.PendingOrderViewHolder> {
-    private final ArrayList<String> customerNames;
-    private final ArrayList<String> quantity;
-    private final ArrayList<Integer> foodImage;
-    private final android.content.Context context;
+    private final ArrayList<Order> orderList;
+    private final Context context;
 
-    public PendingOrderAdapter(ArrayList<String> customerNames, ArrayList<String> quantity, ArrayList<Integer> foodImage, android.content.Context context) {
-        this.customerNames = customerNames;
-        this.quantity = quantity;
-        this.foodImage = foodImage;
+    public PendingOrderAdapter(ArrayList<Order> orderList, Context context) {
+        this.orderList = orderList;
         this.context = context;
     }
 
@@ -32,45 +35,76 @@ public class PendingOrderAdapter extends RecyclerView.Adapter<PendingOrderAdapte
 
     @Override
     public void onBindViewHolder(PendingOrderViewHolder holder, int position) {
-        holder.bind(position);
+        holder.bind(orderList.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return customerNames.size();
+        return orderList.size();
     }
 
     class PendingOrderViewHolder extends RecyclerView.ViewHolder {
         private final PendingOrderItemBinding binding;
-        private boolean isAccept = false;
+        private Order order;
 
         public PendingOrderViewHolder(PendingOrderItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+            itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(context, OrderDetailsActivity.class);
+                intent.putExtra("orderId", order.getOrderId());
+                context.startActivity(intent);
+            });
         }
 
-        public void bind(int position) {
-            binding.customerName.setText(customerNames.get(position));
-            binding.pendingOrderQuantity.setText(quantity.get(position));
-            binding.orderFoodImage.setImageResource(foodImage.get(position));
+        public void bind(Order order) {
+            this.order = order;
+            binding.customerName.setText(order.getUserName());
+            binding.pendingOrderQuantity.setText(order.getItems() != null ? String.valueOf(order.getItems().size()) : "0");
 
-            binding.orderedAcceptionButton.setText(isAccept ? "Dispatch" : "Accept");
+            if (order.getItems() != null && !order.getItems().isEmpty()) {
+                Cart firstItem = order.getItems().get(0); // Lấy item đầu tiên
+                Glide.with(context)
+                        .load(firstItem.getFoodImageUrl()) // Tải ảnh từ URL
+                        .placeholder(android.R.drawable.ic_menu_gallery) // Placeholder trong khi tải
+                        .error(android.R.drawable.ic_menu_gallery) // Ảnh lỗi
+                        .into(binding.orderFoodImage);
+            } else {
+                binding.orderFoodImage.setImageResource(android.R.drawable.ic_menu_gallery); // Placeholder nếu không có items
+            }
+            // Hiển thị trạng thái hiện tại
+            String currentStatus = order.getStatus() != null ? order.getStatus() : "Unknown";
+            binding.orderedAcceptionButton.setText(getButtonText(currentStatus));
             binding.orderedAcceptionButton.setOnClickListener(v -> {
-                if (!isAccept) {
-                    isAccept = true;
-                    binding.orderedAcceptionButton.setText("Dispatch");
-                    showToast("Order is accepted");
-                } else {
+                String status = order.getStatus();
+                if (status != null && status.equals(Constants.StatusOrder.PENDING.getDisplayName())) {
+                    updateOrderStatus(Constants.StatusOrder.CONFIRMED.getDisplayName());
+                    binding.orderedAcceptionButton.setText(getButtonText(Constants.StatusOrder.CONFIRMED.getDisplayName()));
+                    showToast("Order is confirmed");
+                } else if (status != null && status.equals(Constants.StatusOrder.CONFIRMED.getDisplayName())) {
+                    updateOrderStatus("Delivering");
                     int adapterPosition = getAdapterPosition();
                     if (adapterPosition != RecyclerView.NO_POSITION) {
-                        customerNames.remove(adapterPosition);
-                        quantity.remove(adapterPosition);
-                        foodImage.remove(adapterPosition);
+                        orderList.remove(adapterPosition);
                         notifyItemRemoved(adapterPosition);
-                        showToast("Order is dispatched");
+                        showToast("Order is now in delivery");
                     }
                 }
             });
+        }
+
+        private String getButtonText(String status) {
+            if (status.equals(Constants.StatusOrder.PENDING.getDisplayName())) return "Accept";
+            if (status.equals(Constants.StatusOrder.CONFIRMED.getDisplayName())) return "Dispatch";
+            return "Accept";
+        }
+
+        private void updateOrderStatus(String newStatus) {
+            DatabaseReference orderRef = FirebaseDatabase.getInstance().getReference()
+                    .child("ORDERS")
+                    .child(order.getUserId())
+                    .child(order.getOrderId());
+            orderRef.child("status").setValue(newStatus);
         }
 
         private void showToast(String message) {

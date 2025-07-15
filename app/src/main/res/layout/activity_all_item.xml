@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".AllItemActivity">
+    tools:context="com.example.adminwareoffood.AllItemActivity">
 
     <ImageButton
         android:id="@+id/backButton"
@@ -44,4 +44,14 @@
         app:layout_constraintTop_toBottomOf="@+id/textView19">
 
     </androidx.recyclerview.widget.RecyclerView>
+    <Button
+        android:id="@+id/loadMoreButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tải thêm"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

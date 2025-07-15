@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.example.food_ordering_app.R;
 public class SplashScreenActivity extends AppCompatActivity {
 
     @Override
