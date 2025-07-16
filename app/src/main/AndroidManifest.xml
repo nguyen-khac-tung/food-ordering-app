@@ -64,6 +64,7 @@
             android:exported="false" />
         <activity android:name=".PersonalInformationActivity"/>
         <activity android:name=".UpdateProfileActivity"/>
+        <activity android:name=".NotificationListActivity"/>
     </application>
 
 </manifest>
