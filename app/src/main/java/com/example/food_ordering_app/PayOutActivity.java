@@ -15,6 +15,7 @@ import com.example.food_ordering_app.config.FirebaseConfig;
 import com.example.food_ordering_app.databinding.ActivityPayOutBinding;
 import com.example.food_ordering_app.fragment.CongratulationFragment;
 import com.example.food_ordering_app.models.Cart;
+import com.example.food_ordering_app.models.Notification;
 import com.example.food_ordering_app.models.Order;
 import com.example.food_ordering_app.models.User;
 import com.example.food_ordering_app.utils.NotificationHelper;
@@ -105,10 +106,11 @@ public class PayOutActivity extends AppCompatActivity {
                     removeCart();
                     CongratulationFragment congratulationFragment = new CongratulationFragment();
                     congratulationFragment.show(getSupportFragmentManager(), congratulationFragment.getTag());
-                    NotificationHelper.showOrderStatusNotification(
-                            this,
+                    Notification notification = new Notification("Wait for confirmation",
+                            "Your order " + order.getOrderId() + " is waiting for confirmation, please wait a few minutes",
                             order.getOrderId(),
-                            "Wait for confirmation", "Your order " + order.getOrderId() + " is waiting for confirmation, please wait a few minutes");
+                            System.currentTimeMillis(), false);
+                    NotificationHelper.notifyAndSave(this, currentUserId, notification);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to place order: " + e.getMessage(), Toast.LENGTH_SHORT).show();

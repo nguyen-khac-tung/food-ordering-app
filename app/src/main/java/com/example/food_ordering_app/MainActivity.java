@@ -1,9 +1,11 @@
 package com.example.food_ordering_app;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,6 +35,11 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         NavigationUI.setupWithNavController(bottomNav, navController);
+
+        ImageView bellIcon = findViewById(R.id.imageView);
+        bellIcon.setOnClickListener(v -> {
+            startActivity(new Intent(this, NotificationListActivity.class));
+        });
     }
 
     private void requestNotificationPermissionIfNeeded() {
