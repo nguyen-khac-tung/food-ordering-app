@@ -32,7 +32,8 @@ public class Constants {
         ADMINS,
         FOODS,
         CARTS,
-        ORDERS;
+        ORDERS,
+        NOTIFICATIONS,
     }
 }
 
