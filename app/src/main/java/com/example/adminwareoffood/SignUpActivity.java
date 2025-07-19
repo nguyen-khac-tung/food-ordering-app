@@ -2,12 +2,12 @@ package com.example.adminwareoffood;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.adminwareoffood.LoginActivity;
 import com.example.adminwareoffood.model.UserAdmin;
 import com.example.food_ordering_app.databinding.ActivitySignUpBinding;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,7 +29,7 @@ public class SignUpActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance().getReference(Constants.FirebaseRef.ADMINS.name());
 
-        String[] locationList = {"VietNam", "Thailand", "Japan", "China", "Singapore"};
+        String[] locationList = {"Vietnam", "Thailand", "Japan", "China", "Singapore"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_list_item_1,
@@ -49,11 +49,20 @@ public class SignUpActivity extends AppCompatActivity {
                 return;
             }
 
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(this, "Invalid email format", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (password.length() < 6) {
+                Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful() && auth.getCurrentUser() != null) {
                             String userId = auth.getCurrentUser().getUid();
-                            UserAdmin userAdmin = new UserAdmin(userName, nameOfRestaurant, email, location, "ROLE_ADMIN"); // phone sẽ mặc định là ""
+                            UserAdmin userAdmin = new UserAdmin(userName, nameOfRestaurant, email, location, "ROLE_ADMIN");
                             database.child(userId).setValue(userAdmin)
                                     .addOnCompleteListener(dbTask -> {
                                         if (dbTask.isSuccessful()) {
@@ -61,12 +70,15 @@ public class SignUpActivity extends AppCompatActivity {
                                             startActivity(new Intent(this, LoginActivity.class));
                                             finish();
                                         } else {
-                                            Toast.makeText(this, "Failed to save user data.", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(this, "Failed to save user data: " + (dbTask.getException() != null ? dbTask.getException().getMessage() : "Unknown error"), Toast.LENGTH_SHORT).show();
                                         }
                                     });
                         } else {
-                            Toast.makeText(this, "Authentication failed: " + (task.getException() != null ? task.getException().getMessage() : ""), Toast.LENGTH_SHORT).show();
-                            Log.d("Account", "createAccount: failure", task.getException());
+                            String errorMessage = "Authentication failed";
+                            if (task.getException() != null) {
+                                errorMessage += ": " + task.getException().getMessage();
+                            }
+                            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
                         }
                     });
         });

@@ -52,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, CreateUserActivity.class);
             startActivity(intent);
         });
+        binding.completedTextView.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, CompletedDetailsActivity.class);
+            startActivity(intent);
+        });
         binding.pendingOrderTextView.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, PendingOrderActivity.class);
             startActivity(intent);
@@ -69,25 +73,33 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 int pendingOrderCount = 0;
                 int completedCount = 0;
+                int totalEarnings = 0;
+
                 for (DataSnapshot userSnapshot : snapshot.getChildren()) {
                     for (DataSnapshot orderSnapshot : userSnapshot.getChildren()) {
                         Order order = orderSnapshot.getValue(Order.class);
-                        if (order.getStatus().equals(Constants.StatusOrder.PENDING.getDisplayName())) {
-                            pendingOrderCount++;
-                        }else if (order.getStatus().equals(Constants.StatusOrder.COMPLETED.getDisplayName())) {
-                            completedCount++;
+                        if (order != null) {
+                            if (order.getStatus() != null) {
+                                if (order.getStatus().equals(Constants.StatusOrder.PENDING.getDisplayName())) {
+                                    pendingOrderCount++;
+                                } else if (order.getStatus().equals(Constants.StatusOrder.COMPLETED.getDisplayName())) {
+                                    completedCount++;
+                                    // Cộng dồn totalAmount của các đơn hàng Completed
+                                    totalEarnings += order.getTotalAmount();
+                                }
+                            }
                         }
                     }
                 }
                 binding.totalPendingOrder.setText(String.valueOf(pendingOrderCount));
                 binding.totalCompleted.setText(String.valueOf(completedCount));
+                binding.wholeTimeEarning.setText(String.valueOf(totalEarnings) + "$");
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(MainActivity.this, "Failed to load pending orders", Toast.LENGTH_SHORT).show();
             }
-
         });
     }
 }

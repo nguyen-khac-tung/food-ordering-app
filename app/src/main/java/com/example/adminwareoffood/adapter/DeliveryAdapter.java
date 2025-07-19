@@ -7,6 +7,9 @@ import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.adminwareoffood.model.Order;
 import com.example.food_ordering_app.databinding.DeliveryItemBinding;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 
 public class DeliveryAdapter extends RecyclerView.Adapter<DeliveryAdapter.DeliveryViewHolder> {
@@ -27,7 +30,35 @@ public class DeliveryAdapter extends RecyclerView.Adapter<DeliveryAdapter.Delive
 
     @Override
     public void onBindViewHolder(DeliveryViewHolder holder, int position) {
-        holder.bind(orderList.get(position));
+        Order order = orderList.get(position);
+        holder.bind(order);
+
+        holder.binding.statusMoney.setOnClickListener(v -> {
+            if ("Delivering".equalsIgnoreCase(order.getStatus())) {
+                // Toggle between "Not Received" and "Received"
+                String newPaymentStatus = "Not Received".equalsIgnoreCase(order.getPaymentStatus()) ? "Received" : "Not Received";
+
+                // Update Firebase with new payment status
+                DatabaseReference orderRef = FirebaseDatabase.getInstance()
+                        .getReference("ORDERS")
+                        .child(order.getUserId())
+                        .child(order.getOrderId());
+
+                orderRef.child("paymentStatus").setValue(newPaymentStatus);
+
+                // If user clicks "Received", update order status to "completed"
+                if ("Received".equalsIgnoreCase(newPaymentStatus)) {
+                    orderRef.child("status").setValue("completed");
+                }
+
+                // Update local data and UI
+                order.setPaymentStatus(newPaymentStatus);
+                if ("Received".equalsIgnoreCase(newPaymentStatus)) {
+                    order.setStatus("completed");
+                }
+                notifyItemChanged(position);
+            }
+        });
     }
 
     @Override
@@ -44,25 +75,22 @@ public class DeliveryAdapter extends RecyclerView.Adapter<DeliveryAdapter.Delive
         }
 
         void bind(Order order) {
-            // Hiển thị tên khách hàng
             binding.customerName.setText(order.getUserName());
-            // Hiển thị trạng thái thanh toán (giả định Order có trường paymentStatus)
-            String moneyStatus = order.getPaymentStatus() != null ? order.getPaymentStatus() : "Pending";
+
+            // Display payment status
+            String moneyStatus = order.getPaymentStatus() != null ? order.getPaymentStatus() : "Not Received";
             binding.statusMoney.setText(moneyStatus);
-            // Thiết lập màu sắc cho trạng thái thanh toán
+
+            // Set color based on payment status when Delivering
             int color;
-            switch (moneyStatus.toLowerCase()) {
-                case "received":
+            if ("Delivering".equalsIgnoreCase(order.getStatus())) {
+                if ("Received".equalsIgnoreCase(moneyStatus)) {
                     color = Color.parseColor("#4caf50"); // green
-                    break;
-                case "pending":
-                    color = Color.parseColor("#b3b3b3"); // gray
-                    break;
-                case "not received":
+                } else {
                     color = Color.parseColor("#ff3b3b"); // red
-                    break;
-                default:
-                    color = Color.BLACK;
+                }
+            } else {
+                color = Color.parseColor("#b3b3b3"); // gray for other statuses
             }
             binding.statusMoney.setTextColor(color);
             binding.statusColor.setCardBackgroundColor(color);

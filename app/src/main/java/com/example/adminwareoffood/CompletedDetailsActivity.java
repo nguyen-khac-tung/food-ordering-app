@@ -6,84 +6,90 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.example.adminwareoffood.adapter.DeliveryAdapter;
+
+import com.example.adminwareoffood.adapter.CompletedOrderAdapter;
 import com.example.adminwareoffood.model.Order;
-import com.example.food_ordering_app.databinding.ActivityOutForDeliveryBinding;
+import com.example.food_ordering_app.databinding.ActivityCompletedDetailsBinding;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+
 import java.util.ArrayList;
 
-public class OutForDeliveryActivity extends AppCompatActivity {
-    private ActivityOutForDeliveryBinding binding;
+public class CompletedDetailsActivity extends AppCompatActivity {
+    private ActivityCompletedDetailsBinding binding;
     private DatabaseReference ordersRef;
     private ArrayList<Order> orderList = new ArrayList<>();
-    private DeliveryAdapter adapter;
+    private CompletedOrderAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        binding = ActivityOutForDeliveryBinding.inflate(getLayoutInflater());
+        binding = ActivityCompletedDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         binding.backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        // Sử dụng binding để xử lý WindowInsets
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
         // Khởi tạo tham chiếu đến bảng ORDERS trong Firebase
         ordersRef = FirebaseDatabase.getInstance().getReference().child("ORDERS");
 
         // Thiết lập RecyclerView
-        adapter = new DeliveryAdapter(orderList, this);
-        binding.deliveryRecycleView.setAdapter(adapter);
-        binding.deliveryRecycleView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new CompletedOrderAdapter(orderList, this);
+        binding.completedRecyclerView.setAdapter(adapter);
+        binding.completedRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Lấy dữ liệu từ Firebase
-        fetchOrders();
+        fetchCompletedOrders();
     }
 
-    private void fetchOrders() {
+    private void fetchCompletedOrders() {
         ordersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 orderList.clear();
-                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) { // Loop through userId
-                    for (DataSnapshot orderSnapshot : userSnapshot.getChildren()) { // Loop through orderId
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    for (DataSnapshot orderSnapshot : userSnapshot.getChildren()) {
                         Order order = orderSnapshot.getValue(Order.class);
                         if (order != null) {
-                            // Set orderId and userId
                             order.setOrderId(orderSnapshot.getKey());
                             order.setUserId(userSnapshot.getKey());
 
-                            // Filter orders with status "Delivering"
-                            if (Constants.StatusOrder.DELIVERING.getDisplayName().equalsIgnoreCase(order.getStatus())) {
-                                // Keep the original paymentStatus if it exists
-                                if (order.getPaymentStatus() == null) {
-                                    order.setPaymentStatus("Not Received"); // Default value if null
-                                }
+                            // Filter orders with status "Completed"
+                            if ("Completed".equalsIgnoreCase(order.getStatus())) {
                                 orderList.add(order);
                             }
                         }
                     }
                 }
-                // Notify adapter of data changes
                 adapter.notifyDataSetChanged();
 
                 // Hiển thị thông báo nếu không có đơn hàng
                 if (orderList.isEmpty()) {
-                    binding.deliveryRecycleView.setVisibility(View.GONE);
+                    binding.completedRecyclerView.setVisibility(View.GONE);
 
                 } else {
-                    binding.deliveryRecycleView.setVisibility(View.VISIBLE);
+                    binding.completedRecyclerView.setVisibility(View.VISIBLE);
+
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 databaseError.toException().printStackTrace();
-                Toast.makeText(OutForDeliveryActivity.this, "Error loading orders: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CompletedDetailsActivity.this, "Error loading orders: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

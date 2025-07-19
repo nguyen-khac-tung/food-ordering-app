@@ -3,17 +3,18 @@ package com.example.adminwareoffood;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-
+import com.example.adminwareoffood.MainActivity;
+import com.example.adminwareoffood.SignUpActivity;
 import com.example.food_ordering_app.databinding.ActivityLoginBinding;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
     private ActivityLoginBinding binding;
     private FirebaseAuth auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,19 +37,20 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
-                            // Replace MainActivity.class with your dashboard activity if needed
                             startActivity(new Intent(this, MainActivity.class));
                             finish();
                         } else {
-                            Toast.makeText(this, "Login failed: " + (task.getException() != null ? task.getException().getMessage() : ""), Toast.LENGTH_SHORT).show();
+                            String errorMessage = "Login failed";
+                            if (task.getException() != null) {
+                                errorMessage += ": " + task.getException().getMessage();
+                            }
+                            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
                         }
                     });
         });
 
-
         binding.dontHaveAccountButton.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, SignUpActivity.class));
         });
     }
 }
