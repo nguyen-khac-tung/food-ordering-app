@@ -21,6 +21,7 @@ public class FoodDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         binding = ActivityFoodDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 

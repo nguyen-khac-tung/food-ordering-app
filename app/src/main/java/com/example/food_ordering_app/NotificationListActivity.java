@@ -3,6 +3,7 @@ package com.example.food_ordering_app;
 import android.os.Bundle;
 import android.widget.ImageButton;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -31,6 +32,7 @@ public class NotificationListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_notification);
 
         recyclerView = findViewById(R.id.rvNotifications);
